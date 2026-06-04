@@ -98,11 +98,20 @@ LLM_PROVIDER=mock EMBEDDING_PROVIDER=mock pytest -q
 The key suite, `tests/test_scoring.py`, asserts the score is reproducible and that the breakdown's
 weighted sum reconciles to the final value.
 
+## Recruiter safety check
+
+Paste a recruiter message and get a **deterministic, rule-based** risk read (green / yellow /
+orange / red) with the specific signals that fired — asks for documents, upfront fee, move to
+WhatsApp/Telegram, free-email domain, no official link, no company named, urgency, generic
+greeting. Like the score, the verdict is a function of weighted signals, never an LLM guess, and
+it's framed as *indicators to verify* with a concrete next-step recommendation — not an accusation.
+Endpoint: `POST /api/v1/safety/check`.
+
 ## Roadmap
 
-- **v1 (this repo)**: profile, hybrid scoring, recruiter message, application board.
-- **v2**: RAG over your CV, interview prep, recruiter safety check (risk signals), Kanban, CSV
-  export, email reminders.
+- **v1 (this repo)**: profile, hybrid scoring, recruiter message, application board, recruiter
+  safety check.
+- **v2**: RAG over your CV, interview prep, Kanban, CSV export, email reminders.
 - **v3**: Gmail/Calendar integration, job import, browser extension, multi-user SaaS.
 
 ## Spec-driven

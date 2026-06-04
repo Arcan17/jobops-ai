@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Board } from "@/components/Board";
+import { SafetyCheck } from "@/components/SafetyCheck";
 import { ScoreCard } from "@/components/ScoreCard";
 import { api, ApiError, clearToken, getToken } from "@/lib/api";
 import type {
@@ -225,6 +226,8 @@ export default function DashboardPage() {
               </button>
             </form>
           </div>
+
+          <SafetyCheck />
 
           <div className="space-y-3">
             {jobs.map((job) => (

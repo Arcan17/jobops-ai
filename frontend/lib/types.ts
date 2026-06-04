@@ -72,3 +72,19 @@ export interface GeneratedMessage {
   tone: string | null;
   content: string;
 }
+
+export type RiskLevel = "green" | "yellow" | "orange" | "red";
+
+export interface SafetySignal {
+  code: string;
+  label: string;
+  severity: number;
+  detail: string;
+}
+
+export interface SafetyResult {
+  risk: RiskLevel;
+  score: number;
+  signals: SafetySignal[];
+  recommendation: string;
+}

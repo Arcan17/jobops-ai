@@ -2,6 +2,7 @@ import type {
   BoardResponse,
   GeneratedMessage,
   Job,
+  SafetyResult,
   Score,
 } from "./types";
 
@@ -94,6 +95,17 @@ export const api = {
     request<GeneratedMessage>(`/applications/${applicationId}/messages`, {
       method: "POST",
       body: JSON.stringify({ type: "recruiter_outreach" }),
+    }),
+
+  safetyCheck: (payload: {
+    message: string;
+    email_domain?: string | null;
+    has_official_link?: boolean | null;
+    company_named?: boolean | null;
+  }) =>
+    request<SafetyResult>("/safety/check", {
+      method: "POST",
+      body: JSON.stringify(payload),
     }),
 };
 
