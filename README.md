@@ -62,6 +62,19 @@ docker compose up --build              # Postgres+pgvector + backend on :8000
 The backend container runs migrations and seeds a single user (`SEED_USER_EMAIL` /
 `SEED_USER_PASSWORD`) on startup.
 
+### Frontend (Next.js board)
+
+```bash
+cd frontend
+cp .env.local.example .env.local   # point NEXT_PUBLIC_API_URL at the backend
+npm install
+npm run dev                        # http://localhost:3000
+```
+
+A dark-themed dashboard: sign in, paste a job, score it (with the component breakdown
+visualized), add it to the board, move applications through states, and generate the recruiter
+message. Next.js 15 (App Router) · TypeScript · Tailwind v4.
+
 ### Demo flow (under a minute)
 
 1. `POST /api/v1/auth/login` → copy the `access_token`.

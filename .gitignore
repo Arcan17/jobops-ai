@@ -11,10 +11,14 @@ venv/
 # Env / secrets
 .env
 backend/.env
+.env.local
+frontend/.env.local
 
 # OS
 .DS_Store
 
-# Node (frontend, if added)
+# Node (frontend)
 node_modules/
 .next/
+next-env.d.ts
+*.tsbuildinfo
