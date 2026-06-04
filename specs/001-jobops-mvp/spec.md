@@ -8,6 +8,19 @@
 
 **Input**: User description: "JobOps AI MVP: paste a job, hybrid scoring, recruiter message, application status board"
 
+## Clarifications
+
+### Session 2026-06-04
+
+- **Job input**: Structured fields only (company, description, stack, requirements, modality,
+  country/location, salary, link). No LLM text parsing in v1 — keeps the score path deterministic.
+- **Scoring weights** (sum 100%, centralized in settings/constants): stack_match 30, seniority_match
+  20, modality_location 15, projects_match 15, salary_interest 10, risk_penalty 10.
+- **Message types in v1**: Recruiter outreach message only. Follow-up, "why interested?", and
+  salary-expectation replies are deferred to v2.
+- **Authentication**: JWT with a single seeded user (provisioned via env/seed script). Reuses the
+  AgentDesk `security.py` pattern. No self-service registration / user management in v1.
+
 ## Overview
 
 JobOps AI is a single-user, AI-powered job-search CRM. The candidate maintains a profile
@@ -154,10 +167,11 @@ all fields persisted.
 - **FR-009**: System MUST record an application event (actor, timestamp, from-state, to-state) on
   every state transition and reject transitions to unknown states.
 - **FR-010**: System MUST return applications grouped by state in canonical order for the board view.
-- **FR-011**: System MUST generate a recruiter outreach message for an application, referencing the
-  role and the profile's most relevant projects, and MUST persist it linked to the application.
-- **FR-012**: System MUST gate all write operations behind a simple auth token/JWT, even in
-  single-user mode, and MUST validate all inputs with schema validation.
+- **FR-011**: System MUST generate a recruiter outreach message (the only message type in v1) for
+  an application, referencing the role and the profile's most relevant projects, and MUST persist it
+  linked to the application. Follow-up / form / salary-reply message types are deferred to v2.
+- **FR-012**: System MUST gate all write operations behind JWT auth tied to a single seeded user,
+  and MUST validate all inputs with schema validation. No self-service registration in v1.
 - **FR-013**: System MUST emit structured logs for key events: profile_updated, job_created,
   score_computed, message_generated, application_status_changed.
 - **FR-014**: System MUST run all tests deterministically with mock providers and MUST make zero
