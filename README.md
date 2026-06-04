@@ -1,5 +1,7 @@
 # JobOps AI — AI-powered Job Search CRM
 
+[![CI](https://github.com/Arcan17/jobops-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/Arcan17/jobops-ai/actions/workflows/ci.yml)
+
 > Score jobs, generate outreach, track applications — with a **defensible, reproducible**
 > AI scoring engine, not a black-box chatbot.
 
