@@ -1,0 +1,26 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: jobops
+      POSTGRES_PASSWORD: jobops
+      POSTGRES_DB: jobops
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobops"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://jobops:jobops@db:5432/jobops
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: jobops
+          POSTGRES_PASSWORD: jobops
+          POSTGRES_DB: jobops
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jobops"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The mock providers are the ONLY providers exercised in CI (Constitution IV).
+      LLM_PROVIDER: mock
+      EMBEDDING_PROVIDER: mock
+      DATABASE_URL: postgresql+asyncpg://jobops:jobops@localhost:5432/jobops
+      JWT_SECRET: ci-secret
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check app tests
+
+      - name: Type-check (mypy)
+        run: mypy app
+
+      - name: Migrate (alembic)
+        run: alembic upgrade head
+
+      - name: Test (pytest)
+        run: pytest -q
