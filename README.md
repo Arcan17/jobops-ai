@@ -5,6 +5,17 @@
 > Score jobs, generate outreach, track applications — with a **defensible, reproducible**
 > AI scoring engine, not a black-box chatbot.
 
+## Screenshots
+
+The whole demo runs on the deterministic **mock** LLM/embedding provider — no API keys, no cost,
+reproducible output.
+
+![Dashboard: scored jobs, breakdown, and the application board](docs/screenshots/02-dashboard.png)
+
+| Hybrid score breakdown | Recruiter safety check |
+| --- | --- |
+| ![Score breakdown with weighted components](docs/screenshots/03-score.png) | ![Rule-based recruiter risk signals](docs/screenshots/04-safety.png) |
+
 JobOps AI is a single-user job-search CRM. You keep a candidate profile (skills, projects,
 preferences); you paste a job opportunity; the system scores the fit against your profile with a
 **hybrid algorithm** (deterministic weighted components + embeddings, LLM only for narrative),
