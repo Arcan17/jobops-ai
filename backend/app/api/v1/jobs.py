@@ -3,15 +3,17 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.job import JobCreate, JobRead
+from app.schemas.job_import import JobImportResponse
 from app.schemas.score import ScoreRead
-from app.services import job_service, profile_service, scoring_service
+from app.services import job_import_service, job_service, profile_service, scoring_service
+from app.services.job_import_service import JobSource
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -34,6 +36,24 @@ async def list_jobs(
     profile = await profile_service.get_or_create_profile(db, user.id)
     jobs = await job_service.list_jobs(db, profile)
     return [JobRead.model_validate(j) for j in jobs]
+
+
+@router.post("/import", response_model=JobImportResponse)
+async def import_public_jobs(
+    sources: list[JobSource] | None = Query(default=None),
+    limit_per_source: int = Query(default=25, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> JobImportResponse:
+    """Import and deduplicate jobs from approved public feeds."""
+    profile = await profile_service.get_or_create_profile(db, user.id)
+    selected_sources = sources or [JobSource.remoteok, JobSource.wwr]
+    return await job_import_service.import_jobs(
+        db,
+        profile,
+        selected_sources,
+        limit_per_source=limit_per_source,
+    )
 
 
 @router.get("/{job_id}", response_model=JobRead)
