@@ -83,6 +83,13 @@ async def test_import_endpoint_deduplicates_existing_links(
     assert first.status_code == 200, first.text
     assert first.json()["created"] == 1
     assert first.json()["skipped_duplicates"] == 0
+    assert len(first.json()["ranked"]) == 1
+    assert len(first.json()["shortlist"]) == 1
+    assert first.json()["ranked"][0]["job"]["link"] == "https://example.test/jobs/1"
+    assert 1.0 <= first.json()["ranked"][0]["score"]["value"] <= 10.0
+    assert first.json()["ranked"][0]["score"]["narrative"]["rationale"].startswith(
+        "Deterministic JOB_HUNT batch score"
+    )
 
     second = await client.post(
         "/api/v1/jobs/import?sources=remoteok&limit_per_source=10",
@@ -91,3 +98,5 @@ async def test_import_endpoint_deduplicates_existing_links(
     assert second.status_code == 200, second.text
     assert second.json()["created"] == 0
     assert second.json()["skipped_duplicates"] == 1
+    assert second.json()["ranked"] == []
+    assert second.json()["shortlist"] == []
