@@ -1,0 +1,56 @@
+name: Live Job Sources Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/live-job-sources.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  live-job-sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend
+        working-directory: backend
+        run: pip install -e .
+
+      - name: Fetch and validate live sources
+        working-directory: backend
+        env:
+          LLM_PROVIDER: mock
+          EMBEDDING_PROVIDER: mock
+          JWT_SECRET: live-smoke-only
+        run: |
+          python - <<'PY'
+          import asyncio
+
+          from app.job_sources.remoteok import fetch_remoteok_jobs
+          from app.job_sources.wwr import fetch_wwr_jobs
+
+          async def check(name, fetcher):
+              jobs = await fetcher(10)
+              assert jobs, f"{name}: zero jobs returned"
+              for job in jobs:
+                  assert job.link.startswith("http"), f"{name}: invalid link {job.link!r}"
+                  assert job.company.strip(), f"{name}: empty company"
+                  assert job.role_title.strip(), f"{name}: empty role title"
+              print(f"{name}: fetched={len(jobs)}")
+              for job in jobs[:3]:
+                  print(f"- {job.company} | {job.role_title} | {job.link}")
+
+          async def main():
+              await check("remoteok", fetch_remoteok_jobs)
+              await check("wwr", fetch_wwr_jobs)
+
+          asyncio.run(main())
+          PY
