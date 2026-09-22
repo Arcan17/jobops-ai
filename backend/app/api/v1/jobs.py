@@ -42,6 +42,8 @@ async def list_jobs(
 async def import_public_jobs(
     sources: list[JobSource] | None = Query(default=None),
     limit_per_source: int = Query(default=25, ge=1, le=100),
+    score_created: bool = Query(default=True),
+    shortlist_limit: int = Query(default=20, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> JobImportResponse:
@@ -53,6 +55,8 @@ async def import_public_jobs(
         profile,
         selected_sources,
         limit_per_source=limit_per_source,
+        score_created=score_created,
+        shortlist_limit=shortlist_limit,
     )
 
 
