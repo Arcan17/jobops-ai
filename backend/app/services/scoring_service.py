@@ -149,3 +149,54 @@ async def score_job(db: AsyncSession, profile: Profile, job: JobOpportunity) -> 
         recommendation=recommendation.value,
     )
     return score
+
+
+async def score_job_deterministic(
+    db: AsyncSession, profile: Profile, job: JobOpportunity
+) -> Score:
+    """Persist the numeric/explainable score without an LLM narrative.
+
+    JOB_HUNT batch mode uses this path so dozens of discovered jobs can be ranked
+    quickly and cheaply. The numeric score, recommendation, component breakdown,
+    risks, and missing requirements are identical in meaning to score_job().
+    A later explicit score_job() call may enrich/replace the narrative with LLM prose.
+    """
+    breakdown, risk_notes, missing = await compute_components(db, profile, job)
+    value = aggregate(breakdown)
+    recommendation = W.recommendation_for(value)
+    narrative = {
+        "risks": risk_notes,
+        "missing_requirements": missing,
+        "projects_to_highlight": [],
+        "rationale": "Deterministic JOB_HUNT batch score; narrative not generated.",
+    }
+
+    existing = await db.scalar(
+        select(Score).where(Score.job_opportunity_id == job.id)
+    )
+    if existing is None:
+        score = Score(
+            job_opportunity_id=job.id,
+            value=value,
+            recommendation=recommendation,
+            breakdown=breakdown,
+            narrative=narrative,
+        )
+        db.add(score)
+    else:
+        existing.value = value
+        existing.recommendation = recommendation
+        existing.breakdown = breakdown
+        existing.narrative = narrative
+        score = existing
+
+    await db.commit()
+    await db.refresh(score)
+    log.info(
+        "job_hunt_score_computed",
+        job_id=str(job.id),
+        value=value,
+        recommendation=recommendation.value,
+        narrative_mode="deterministic",
+    )
+    return score
