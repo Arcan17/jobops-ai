@@ -4,6 +4,12 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 from app.schemas.job import JobRead
+from app.schemas.score import ScoreRead
+
+
+class RankedImportedJob(BaseModel):
+    job: JobRead
+    score: ScoreRead
 
 
 class JobImportSourceResult(BaseModel):
@@ -12,6 +18,7 @@ class JobImportSourceResult(BaseModel):
     created: int
     skipped_duplicates: int
     jobs: list[JobRead]
+    ranked: list[RankedImportedJob] = []
 
 
 class JobImportResponse(BaseModel):
@@ -19,3 +26,5 @@ class JobImportResponse(BaseModel):
     created: int
     skipped_duplicates: int
     sources: list[JobImportSourceResult]
+    ranked: list[RankedImportedJob] = []
+    shortlist: list[RankedImportedJob] = []
